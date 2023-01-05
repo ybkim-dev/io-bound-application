@@ -19,6 +19,9 @@ public class PostController {
     PostRepository postRepository;
 
     @Autowired
+    PostCacheService postCacheService;
+
+    @Autowired
     Producer producer;
 
     @Autowired
@@ -34,11 +37,16 @@ public class PostController {
 
     // 2-1. 글 목록을 조회한다.
     // 2-2 글 목록을 페이징하여 반환
+    // 캐싱까지!
     @GetMapping("/posts")
     public Page<Post> getPostList(@RequestParam(defaultValue = "1") Integer page) {
-        return postRepository.findAll(
-                PageRequest.of(page - 1, PAGE_SIZE, Sort.by("id").descending())
-        );
+        if(page.equals(1)) {
+            return postCacheService.getFirstPostPage();
+        } else {
+            return postRepository.findAll(
+                    PageRequest.of(page - 1, PAGE_SIZE, Sort.by("id").descending())
+            );
+        }
     }
     
 
